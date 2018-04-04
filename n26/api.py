@@ -14,12 +14,18 @@ class Api(object):
 
     def get_token(self):
         values_token = {'grant_type': 'password', 'username': self.config.username, 'password': self.config.password}
-        headers_token = {'Authorization': 'Basic YW5kcm9pZDpzZWNyZXQ='}
+        headers_token = {
+            'Authorization': 'Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0',
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.109 Safari/537.36'
+        }
 
         response_token = requests.post(url + '/oauth/token', data=values_token, headers=headers_token)
         token_info = response_token.json()
         # TODO check if access_token is not nil
-        return token_info['access_token']
+        try:
+            return token_info['access_token']
+        except:
+            print(response_token.content)
 
     # TODO: this method will check if token is valid, if not it will run get_token
     def validate_token():
@@ -95,6 +101,7 @@ class Api(object):
         req_transactions = requests.get(url + '/api/smrt/transactions?limit=' +
                                         str(limit), headers=headers_balance)
         transactions = req_transactions.json()
+        # print(transactions)
         return transactions
 
     def get_statements(self):

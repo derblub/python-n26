@@ -1,5 +1,6 @@
 import n26.api as api
 import click
+import datetime
 from tabulate import tabulate
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
@@ -90,18 +91,22 @@ def transactions(limit):
     print('-------------')
     li = []
     for i, val in enumerate(output):
-        try:
-            if val['merchantName'] in val.values():
-                li.append([i, str(val['amount']), val['merchantName']])
-        except KeyError:
-            if val['referenceText'] in val.values():
-                li.append([i, str(val['amount']), val['referenceText']])
-            else:
-                li.append([i, str(val['amount']), 'no details available'])
+        if 'merchantName' in val:
+            partner = val.get('merchantName', ' ')
+        else:
+            partner = val.get('partnerName', ' ')
+
+        li.append([
+            i,
+            str(val.get('amount',' ')),
+            partner,
+            val.get('referenceText', ' '),
+            datetime.datetime.fromtimestamp(val.get('confirmed', 0)/1000).strftime('%Y-%m-%d %H:%M:%S')
+        ])
 
     # Tabulate
     table = li
-    headers = ['index', 'amount', 'details']
+    headers = ['#', 'amount', 'partner/merchant', 'reference-text', 'confirmed']
     print(tabulate(table, headers, tablefmt='simple', numalign='right'))
 
 
