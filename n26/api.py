@@ -11,8 +11,11 @@ class Api(object):
         if not cfg:
             cfg = config.get_config()
         self.config = cfg
+        self.token = False
 
     def get_token(self):
+        if self.token:
+            return self.token
         values_token = {'grant_type': 'password', 'username': self.config.username, 'password': self.config.password}
         headers_token = {
             'Authorization': 'Basic bXktdHJ1c3RlZC13ZHBDbGllbnQ6c2VjcmV0',
@@ -23,7 +26,8 @@ class Api(object):
         token_info = response_token.json()
         # TODO check if access_token is not nil
         try:
-            return token_info['access_token']
+            self.token = token_info['access_token']
+            return self.token
         except:
             print(response_token.content)
 

@@ -82,32 +82,36 @@ def statements():
 
 
 @cli.command()
-@click.option('--limit', default=5, help='Limit transaction output.')
+@click.option('--limit', default=20, help='Limit transaction output.')
 def transactions(limit):
-    """ Show transactions (default: 5) """
+    """ Show transactions (default: 20) """
     transactions = api.Api()
     output = transactions.get_transactions_limited(str(limit))
     print('Transactions:')
     print('-------------')
     li = []
     for i, val in enumerate(output):
-        if 'merchantName' in val:
-            partner = val.get('merchantName', ' ')
-        else:
-            partner = val.get('partnerName', ' ')
-
         li.append([
-            i,
-            str(val.get('amount',' ')),
-            partner,
-            val.get('referenceText', ' '),
+            str(val.get('amount')),
+            insertNewlines(val.get('merchantName', val.get('partnerName')), 30),
+            insertNewlines(val.get('referenceText'), 100),
             datetime.datetime.fromtimestamp(val.get('confirmed', 0)/1000).strftime('%Y-%m-%d %H:%M:%S')
         ])
 
     # Tabulate
     table = li
-    headers = ['#', 'amount', 'partner/merchant', 'reference-text', 'confirmed']
-    print(tabulate(table, headers, tablefmt='simple', numalign='right'))
+    headers = ['amount', 'partner/merchant', 'reference-text', 'confirmed']
+    print(tabulate(table, headers, tablefmt='simple', numalign='right', floatfmt=".2f"))
+
+
+def insertNewlines(text, lineLength):
+    if text is None or not len(text):
+        return
+    if len(text) <= lineLength:
+        return text
+    else:
+        return text[:lineLength] + '\n' + insertNewlines(text[lineLength:], lineLength)
+
 
 
 if __name__ == '__main__':
